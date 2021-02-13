@@ -118,7 +118,7 @@ int z_load(unsigned int uid, unsigned int lp_id, std::string data_name, char* bu
     locked = true;
 
     if(user_to_partition_map.find(uid) == user_to_partition_map.end()) {
-        partition_lock.unlock();
+        //partition_lock.unlock();
         std::cout << "z_load - Cannot find uid in user_list : " << uid << std::endl;
     }
     else {
