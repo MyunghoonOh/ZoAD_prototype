@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -std=c++14 -pthread -g  -shared -Wl,-soname,libzoad.so -o libzoad.so CMakeFiles/zoad.dir/controller.c.o CMakeFiles/zoad.dir/Zone.cpp.o CMakeFiles/zoad.dir/IO_request.cpp.o CMakeFiles/zoad.dir/Userdata.cpp.o CMakeFiles/zoad.dir/IZG.cpp.o CMakeFiles/zoad.dir/Partition.cpp.o CMakeFiles/zoad.dir/zoad.cpp.o 

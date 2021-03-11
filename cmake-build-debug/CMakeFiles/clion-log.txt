@@ -1,4 +1,0 @@
-/home/hoon/clion-2020.3/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/hoon/CLionProjects/ZoAD
--- Configuring done
--- Generating done
--- Build files have been written to: /home/hoon/CLionProjects/ZoAD/cmake-build-debug
