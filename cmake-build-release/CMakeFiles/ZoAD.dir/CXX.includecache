@@ -11,6 +11,8 @@ queue
 -
 mutex
 -
+atomic
+-
 
 /home/hoon/CLionProjects/ZoAD/IZG.h
 vector
@@ -39,7 +41,7 @@ vector
 -
 queue
 -
-mutex
+atomic
 -
 Zone.h
 /home/hoon/CLionProjects/ZoAD/Zone.h

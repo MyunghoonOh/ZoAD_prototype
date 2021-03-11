@@ -14,8 +14,8 @@ int _z_flush(class Partition* partition, std::string data_name, char* buf, unsig
 int z_flush(unsigned int uid, unsigned int lp_id, std::string data_name, char* buf, unsigned int size, unsigned int flag);
 int _z_load(class Partition* partition, std::string data_name, char* buf, unsigned int size);
 int z_load(unsigned int uid, unsigned int lp_id, std::string data_name, char* buf, unsigned int size);
-int _z_sync(class Partition* partition, std::string data_name, unsigned int size);
-int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name, unsigned int size);
+int _z_sync(class Partition* partition, std::string data_name);
+int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name);
 int _z_del(class Partition* partition, std::string data_name);
 int z_del(unsigned int uid, unsigned int lp_id, std::string data_name);
 int z_closelp(unsigned int uid, unsigned int lp_id);

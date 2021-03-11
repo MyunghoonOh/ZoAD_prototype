@@ -12,6 +12,7 @@
 
 #include <queue>
 #include <mutex>
+#include <atomic>
 
 class worker_arg{
 public:
@@ -26,6 +27,8 @@ public:
 class IO_request {
 public:
     unsigned int rw;
+    std::atomic_flag read_lock =ATOMIC_FLAG_INIT;
+    bool read_complete;
     char* buf;
     unsigned int size;
     unsigned int offset;

@@ -56,7 +56,7 @@ int z_flush(unsigned int uid, unsigned int lp_id, std::string data_name, char* b
     locked = true;
 
     if(user_to_partition_map.find(uid) == user_to_partition_map.end()) {
-        //partition_lock.unlock();
+        partition_lock.unlock();
         std::cout << "Cannot find uid in user_list : " << uid << std::endl;
     }
     else {
@@ -99,6 +99,16 @@ int _z_load(class Partition* partition, std::string data_name, char* buf, unsign
         userdata = partition->get_userdata(data_name);
         auto request = new class IO_request(READ, buf, size, userdata);
         partition->new_request(request);
+
+        while(true) {
+            while (request->read_lock.test_and_set(std::memory_order_acquire));
+            if(request->read_complete){
+                break;
+            }
+            request->read_lock.clear(std::memory_order_release);
+        }
+
+        delete request;
     }
     else{
         std::cout << "_z_load : Cannot find user data " << data_name << std::endl;
@@ -118,7 +128,7 @@ int z_load(unsigned int uid, unsigned int lp_id, std::string data_name, char* bu
     locked = true;
 
     if(user_to_partition_map.find(uid) == user_to_partition_map.end()) {
-        //partition_lock.unlock();
+        partition_lock.unlock();
         std::cout << "z_load - Cannot find uid in user_list : " << uid << std::endl;
     }
     else {
@@ -145,7 +155,7 @@ int z_load(unsigned int uid, unsigned int lp_id, std::string data_name, char* bu
     return ret;
 }
 
-int _z_sync(class Partition* partition, std::string data_name, unsigned int size) {
+int _z_sync(class Partition* partition, std::string data_name) {
     int ret = 0;
     class Userdata* userdata = NULL;
 
@@ -159,7 +169,7 @@ int _z_sync(class Partition* partition, std::string data_name, unsigned int size
     if(partition->userdata_exist(data_name)){
         partition->unlock_partition();
         userdata = partition->get_userdata(data_name);
-        userdata->Sync(size);
+        userdata->Sync();
     }
     else{
         partition->unlock_partition();
@@ -170,7 +180,7 @@ int _z_sync(class Partition* partition, std::string data_name, unsigned int size
     return ret;
 }
 
-int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name, unsigned int size){
+int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name){
     int ret = -1;
     bool locked = false;
 
@@ -178,7 +188,7 @@ int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name, unsigned
     locked = true;
 
     if(user_to_partition_map.find(uid) == user_to_partition_map.end()) {
-        //partition_lock.unlock();
+        partition_lock.unlock();
         std::cout << "z_sync - Cannot find uid in user_list : " << uid << std::endl;
     }
     else {
@@ -188,7 +198,7 @@ int z_sync(unsigned int uid, unsigned int lp_id, std::string data_name, unsigned
             if (id == lp_id) {
                 partition_lock.unlock();
                 locked = false;
-                ret = _z_sync(iter, data_name, size);
+                ret = _z_sync(iter, data_name);
                 break;
             }
         }
@@ -474,10 +484,12 @@ void zoad_init(){
     if(Identify_HW(dev) < 0){
         std::cout << "Identify HW Error" << std::endl;
     }
+
     std::cout << "Identify IZG" << std::endl;
     if(Identify_IZG() < 0){
         std::cout << "Identify IZG Error" << std::endl;
     }
+
     /*
     std::cout << "Identify I/O Table" << std::endl;
     if(Identify_IO_table() < 0){

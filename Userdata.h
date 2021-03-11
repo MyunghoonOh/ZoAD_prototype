@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <mutex>
+#include <atomic>
 #include "Zone.h"
 
 class Segment
@@ -57,11 +57,13 @@ private:
     unsigned int next_segment_id;
     std::vector<class Segment*> file_segment;
     unsigned int size;
+    unsigned int remain_write_req;
     int _write(class Segment* segment, char* buf, unsigned int write_size);
     //int _read(class Segment* segment, char* buf, unsigned int start_offset, unsigned int read_size);
     int _read(class Segment* segment, char* buf, unsigned int read_size);
     int invalid_segment(class Segment* segment);
-    std::mutex write_lock;
+    std::atomic_flag write_lock =ATOMIC_FLAG_INIT;
+    //std::mutex write_lock;
 public:
     Userdata(class Partition* _partition);
     unsigned int Get_size();
@@ -69,7 +71,8 @@ public:
     int Read(char* buf, unsigned int req_size);
     int Append(char* buf, unsigned int write_size);
     int Delete();
-    int Sync(unsigned int size);
+    //int Sync(unsigned int size);
+    int Sync();
     int Invalid();
     void Lock_data();
     void Unlock_data();

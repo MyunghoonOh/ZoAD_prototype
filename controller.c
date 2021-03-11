@@ -103,7 +103,6 @@ int zns_get_info(const char * dev)
     zns_info -> ns_pref_dealloc_gran = id_ns -> npdg;
     zns_info -> ns_pref_dealloc_align = id_ns -> npda;
     zns_info -> ns_opot_wr_size = id_ns -> nows;
-
     zns_info -> max_active_res = id_ns -> mar;
     zns_info -> opened_zone_num = 0;
     zns_info -> max_open_res = id_ns -> mor;
@@ -111,10 +110,9 @@ int zns_get_info(const char * dev)
     //zns_info -> lbaf = id_ns -> lbaf[0];
     zns_info -> zfi = id_ns -> zfi;
     zns_info -> zonef = id_ns -> zonef[id_ns -> zfi];
-
     zns_info -> max_zone_cnt = (zns_info -> ns_size)/(zns_info -> zonef.zsze);
-    //printf("%u\n", zns_info->max_zone_cnt);
     zone_desc_list = malloc(zns_info -> max_zone_cnt * sizeof(struct zone_descriptor));
+
     return 0;
 }
 

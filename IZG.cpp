@@ -106,6 +106,7 @@ int format(){
 int Identify_HW(std::string dev_str){
     int ret = -1;
     const char* dev = dev_str.c_str();
+
     ret = zns_get_info(dev);
     zns_get_zone_desc(REPORT_ALL, REPORT_ALL_STATE, 0, 0, true);
 
@@ -191,7 +192,6 @@ int Identify_IZG(){
     float base_time = 0;
     float measured_time = 0;
     int total_zone = zns_get_total_zone();
-
     test_data = malloc(_192KB);
     memset(test_data, 'O', _192KB);
 
@@ -209,7 +209,6 @@ int Identify_IZG(){
     */
     total_zone = 128;
     distance = 32;
-
     for(unsigned int i = 0; i < distance; i++) {
         izg_zone = new std::queue<unsigned int>;
         izg_zone->push(i);
@@ -229,7 +228,6 @@ int Identify_IZG(){
         std::cout << "Cannot IZG : " << distance << std::endl;
         ret = -1;
     }
-
     format();
     delete test_data;
 

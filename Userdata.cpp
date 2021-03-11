@@ -13,13 +13,6 @@ void insert_segment(std::vector<class Segment*> &cont, class Segment* segment){
     cont.insert(it, segment);
 }
 
-void Userdata::Lock_data(){
-    write_lock.lock();
-};
-void Userdata::Unlock_data(){
-    write_lock.unlock();
-};
-
 int Userdata::_write(class Segment* segment, char* buf, unsigned int write_size) {
     auto izg_cnt = partition->get_izg_cnt();
     int target_size = write_size;
@@ -181,6 +174,7 @@ int Userdata::_read(class Segment* segment, char* buf, unsigned int req_size){
 }
 Userdata::Userdata(class Partition* _partition){
     partition = _partition;
+    remain_write_req = 0;
     size = 0;
 }
 unsigned int Userdata::Get_size(){
@@ -276,7 +270,7 @@ int Userdata::Read(char* buf, unsigned int read_size)
     unsigned int segment_size = 0;
     ssize_t r = 0;
 
-    write_lock.lock();
+    while (write_lock.test_and_set(std::memory_order_acquire));
 
     for (auto iter = file_segment.begin(); iter != file_segment.end(); iter++){
         if(read_size <= 0) {
@@ -296,7 +290,7 @@ int Userdata::Read(char* buf, unsigned int read_size)
         exit(0);
     }
 
-    write_lock.unlock();
+    write_lock.clear(std::memory_order_release);
 
     return 0;
 }
@@ -310,7 +304,8 @@ int Userdata::Append(char* buf, unsigned int write_size)
         write_size++;
     }
 
-    write_lock.lock();
+    while (write_lock.test_and_set(std::memory_order_acquire));
+    remain_write_req += 1;
     if(file_segment.empty()) {
         offset = 0;
     }
@@ -325,14 +320,15 @@ int Userdata::Append(char* buf, unsigned int write_size)
     ssize_t write_result = _write(tmp_seg, buf, write_size);
     if(write_result < 0)
     {
-        write_lock.unlock();
+        write_lock.clear(std::memory_order_release);
         std::cout << "Append error" << std::endl;
         exit(0);
     }
     insert_segment(file_segment, tmp_seg);
     size += write_size;
 
-    write_lock.unlock();
+    remain_write_req -= 1;
+    write_lock.clear(std::memory_order_release);
 
     return 0;
 }
@@ -355,7 +351,8 @@ int Userdata::Delete(){
     unsigned int segment_size = 0;
     ssize_t r = 0;
 
-    write_lock.lock();
+    while (write_lock.test_and_set(std::memory_order_acquire));
+    remain_write_req += 1;
 
     for (auto iter = file_segment.begin(); iter != file_segment.end(); iter++){
         segment = *iter;
@@ -363,10 +360,12 @@ int Userdata::Delete(){
         delete segment;
     }
 
-    write_lock.unlock();
+    remain_write_req -= 1;
+    write_lock.clear(std::memory_order_release);
 
     return 0;
 }
+/*
 int Userdata::Sync(unsigned int data_size){
     unsigned int written_size = 0;
     class Segment* segment;
@@ -382,6 +381,16 @@ int Userdata::Sync(unsigned int data_size){
         }
         write_lock.unlock();
     }
+
+    return 0;
+}*/
+int Userdata::Sync(){
+    unsigned int written_size = 0;
+    class Segment* segment;
+
+    while (write_lock.test_and_set(std::memory_order_acquire));
+    while(remain_write_req != 0);
+    write_lock.clear(std::memory_order_release);
 
     return 0;
 }

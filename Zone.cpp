@@ -145,9 +145,9 @@ void* thread_read(class zone_request* arg){
     return NULL;
 }
 int izg_write(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, std::vector<class Interval*>* interval_list, std::vector<unsigned int>* write_size_vector, unsigned int write_blocks) {
-    struct timeval sstart = {};
-    struct timeval eend = {};
-    float ttime = 0;
+    //struct timeval sstart = {};
+    //struct timeval eend = {};
+    //float ttime = 0;
     unsigned int thread_num = (izg_cnt / THREAD_PER_IZG);
     if(izg_cnt % THREAD_PER_IZG){
         thread_num++;
@@ -202,7 +202,7 @@ int izg_write(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, s
     interval_it = interval_list->begin();
     interval_list_size = interval_list->size();
     write_size_it = write_size_vector->begin();
-    gettimeofday(&sstart, NULL);
+    //gettimeofday(&sstart, NULL);
     for (int i = 0; i < izg_write; i++) {
         //write_size_it = write_size_vector->begin();
         for (int j = 0; j < thread_num; j++) {
@@ -241,8 +241,8 @@ int izg_write(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, s
             thread[k].join();
         }
     }
-    gettimeofday(&eend, NULL);
-    ttime += (eend.tv_sec - sstart.tv_sec) + ((eend.tv_usec - sstart.tv_usec) * 0.000001);
+    //gettimeofday(&eend, NULL);
+    //ttime += (eend.tv_sec - sstart.tv_sec) + ((eend.tv_usec - sstart.tv_usec) * 0.000001);
     //std::cout << ttime << std::endl;
     for(int i = 0; i < thread_num; i++){
         delete tmp_req[i];
@@ -251,9 +251,9 @@ int izg_write(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, s
     return 0;
 }
 int izg_read(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, std::vector<class Interval*>* interval_list, unsigned int read_size){
-    struct timeval sstart = {};
-    struct timeval eend = {};
-    float ttime = 0;
+    //struct timeval sstart = {};
+    //struct timeval eend = {};
+    //float ttime = 0;
     unsigned int thread_num = (izg_cnt / THREAD_PER_IZG);
     if(izg_cnt % THREAD_PER_IZG){
         thread_num++;
@@ -282,7 +282,7 @@ int izg_read(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, st
     interval_it = interval_list->begin();
     interval_list_size = interval_list->size();
 
-    gettimeofday(&sstart, NULL);
+    //gettimeofday(&sstart, NULL);
     for (int i = 0; i < izg_read; i++) {
         for (int j = 0; j < thread_num; j++) {
             thread_read_size = 0;
@@ -318,9 +318,9 @@ int izg_read(char* buf, unsigned int izg_cnt, unsigned int total_target_zone, st
             thread[k].join();
         }
     }
-    gettimeofday(&eend, NULL);
-    ttime += (eend.tv_sec - sstart.tv_sec) + ((eend.tv_usec - sstart.tv_usec) * 0.000001);
-    std::cout << ttime << std::endl;
+    //gettimeofday(&eend, NULL);
+    //ttime += (eend.tv_sec - sstart.tv_sec) + ((eend.tv_usec - sstart.tv_usec) * 0.000001);
+    //std::cout << ttime << std::endl;
     for(int i = 0; i < thread_num; i++){
         delete tmp_req[i];
     }

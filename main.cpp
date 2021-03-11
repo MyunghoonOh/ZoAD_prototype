@@ -42,7 +42,7 @@ int main() {
         std::cout << "made " << ret << std::endl; //partition id
     }
 */
-  unsigned int iolevel = 8;
+  unsigned int iolevel = 32;
     ret = z_mklp(uid, "/dev/nvme0n1", "hoon_qos", QOS_PARTITION, iolevel);
     if(ret <= 0)
         std::cout << "z_mklp fail" << std::endl;
@@ -67,31 +67,34 @@ int main() {
     }
 */
 
-    unsigned int write_size = _192KB*384*8;
+    unsigned int write_size = _192KB*384*32;
     char* buf = (char*)malloc(write_size);
     char* buf2 = (char*)malloc(write_size);
     memset(buf, 'a', write_size);
-    memset(buf2, 'B', write_size);
+    buf[write_size - 2] = 'b';
+    buf[write_size - 1] = 'c';
+    memset(buf2, 'Q', write_size);
 
 
     ret = z_flush(uid, 1, "dummy", buf, write_size, Z_APPEND);
+    std::cout << "flush" << std::endl;
     //ret = z_flush(uid, 1, "dummy", buf, write_size, Z_UPDATE);
-    //std::cout << "Received Write Requests "<< ret << std::endl;
 
-    ret = z_sync(uid, 1, "dummy", write_size);
-    //std::cout << "Received Sync " << ret << std::endl;
+    ret = z_sync(uid, 1, "dummy");
 
     ret = z_load(uid, 1, "dummy", buf2, write_size);
+    std::cout << "load" << std::endl;
     std::cout << buf2[0] << std::endl;
-    //std::cout << "Received Load Requests " << ret << std::endl;
+    std::cout << buf2[write_size - 2] << std::endl;
+    std::cout << buf2[write_size - 1] << std::endl;
 
     //ret = z_del(uid, 1, "dummy");
     //std::cout << "Delete Requests " << ret << std::endl;
     z_closelp(uid, 1);
+    std::cout << "close" << std::endl;
 
     delete buf;
     delete buf2;
-    //std::cout << "Closed Write Requests "<< ret << std::endl;
 
     z_rmlp(uid, "/dev/nvme0n1", 1);
 

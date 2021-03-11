@@ -14,6 +14,7 @@
 
 IO_request::IO_request(char mode, class Userdata* userdata){
     rw = mode;
+    read_complete = false;
     data = userdata;
 }
 IO_request::IO_request(char mode, char* buffer, unsigned int buf_size, class Userdata* userdata){
@@ -49,13 +50,18 @@ void* worker_job(class worker_arg* arg){
             if (req->rw == WRITE) {
                 auto usrdata = req->data;
                 usrdata->Append(req->buf, req->size);
+                delete req;
             } else if (req->rw == READ) {
                 auto usrdata = req->data;
                 usrdata->Read(req->buf, req->size);
+                while (req->read_lock.test_and_set(std::memory_order_acquire));
+                req->read_complete = true;
+                req->read_lock.clear(std::memory_order_release);
             } else if (req->rw == DELETE) {
                 auto usrdata = req->data;
                 usrdata->Delete();
                 delete usrdata;
+                delete req;
             }
             //gettimeofday(&eend, NULL);
             //ttime += (eend.tv_sec - sstart.tv_sec) + ((eend.tv_usec - sstart.tv_usec) * 0.000001);
@@ -82,13 +88,18 @@ void* worker_job(class worker_arg* arg){
         if (req->rw == WRITE) {
             auto usrdata = req->data;
             usrdata->Append(req->buf, req->size);
+            delete req;
         } else if (req->rw == READ) {
             auto usrdata = req->data;
             usrdata->Read(req->buf, req->size);
+            while (req->read_lock.test_and_set(std::memory_order_acquire));
+            req->read_complete = true;
+            req->read_lock.clear(std::memory_order_release);
         } else if (req->rw == DELETE) {
             auto usrdata = req->data;
             usrdata->Delete();
             delete usrdata;
+            delete req;
         }
         else{
             std::cout << "Wrong request type" << std::endl;
